@@ -69,11 +69,13 @@ public class QuizService {
 	}
 
 	public ResponseEntity getAllQuizQuestions() {
+		List<QuizWrapper> quizeListForUser;
 		List<Quiz> quizList=quizRepository.findAll();
+		try {
 		if(quizList==null || quizList.isEmpty()) {
-			//error
+			throw new QuizNotFound("Quiz not yet created or does not exist");
 		}
-		List<QuizWrapper> quizeListForUser=new ArrayList();
+		quizeListForUser=new ArrayList();
 		for(Quiz quiz:quizList) {
 			List<Question> queFromDb=quiz.getQuestion();
 			List<QuestionWrapper> queForUser=new ArrayList();
@@ -83,6 +85,9 @@ public class QuizService {
 			}
 			QuizWrapper qw=new QuizWrapper(quiz.getId(),queForUser);
 			quizeListForUser.add(qw);
+		}
+		}catch(QuizNotFound ex) {
+			return new ResponseEntity(ex.getMessage(),HttpStatus.NOT_FOUND);
 		}
 
 		return new ResponseEntity(quizeListForUser, HttpStatus.OK);
